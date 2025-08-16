@@ -26,3 +26,5 @@ dist-ssr
 # Backend
 node_modules
 .env
+package.json
+package-lock.json
