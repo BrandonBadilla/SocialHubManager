@@ -14,11 +14,12 @@ const LoginPage = () => {
         body: JSON.stringify({ email, password }),
       });
       const result = await response.json();
+
       if (response.ok && result.require2FA) {
         if (result.qrCodeUrl) {
           alert("Configura 2FA escaneando el código QR");
         } else {
-          localStorage.setItem("userId", result.userId);
+          sessionStorage.setItem("userId", result.userId);
           window.location.href = "/verify-otp";
         }
       } else {

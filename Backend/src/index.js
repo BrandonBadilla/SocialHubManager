@@ -19,6 +19,11 @@ async function findUserByEmail(email) {
   return result.rows[0];
 }
 
+async function findUserById(id) {
+  const result = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+  return result.rows[0];
+}
+
 async function verifyPassword(inputPassword, storedPassword) {
   return await bcrypt.compare(inputPassword, storedPassword);
 }
@@ -39,7 +44,8 @@ async function getUserSecret(userId) {
 // Rutas para servir archivos HTML (si los hubiera)
 app.use(express.static(path.join(__dirname)));
 
-// Registro de usuario
+
+// > > > REGISTRO DE USUARIOS
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -82,7 +88,8 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Inicio de sesión
+
+// > > > INICIO DE SESIÓN
 app.post('/api/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -119,7 +126,8 @@ app.post('/api/login', async (req, res) => {
   });
 });
 
-// Verificar OTP
+
+// > > > VERIFICACIÓN DEL OTP
 app.post('/api/login/verify-otp', async (req, res) => {
   const { userId, token } = req.body;
 
@@ -141,10 +149,13 @@ app.post('/api/login/verify-otp', async (req, res) => {
 
     if (verified) {
       const sessionToken = generateSessionToken({ id: userId });
+      const user = await findUserById(userId);
       return res.json({
         success: true,
         message: 'Código OTP verificado correctamente',
-        token: sessionToken
+        token: sessionToken,
+        userId: user.id,
+        username: user.username
       });
     } else {
       return res.status(400).json({ success: false, message: 'Código OTP incorrecto' });
@@ -155,7 +166,8 @@ app.post('/api/login/verify-otp', async (req, res) => {
   }
 });
 
-// Configuración del servidor
+
+// > > > CONFIGURACIONES
 const PORT = process.env.PORT || 3005;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);

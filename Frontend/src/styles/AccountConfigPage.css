@@ -1,0 +1,117 @@
+/* Contenedor principal */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #28a745, #81c784); /* Verde degradado */
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.container-back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.container-back-button button {
+    padding: 10px 20px;
+    background-color: #a41e2b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.container-back-button button:hover {
+    background-color: #495057; /* gris más oscuro */
+}
+
+/* Título */
+h1 {
+    margin-bottom: 30px;
+    font-size: 2.5rem;
+    text-align: center;
+}
+
+.grid-divs-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Botones principales */
+.grid-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #2f9246; /* Verde */
+    color: white;
+    border: 2px solid #fff; /* borde blanco para resaltar */
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    height: 150px;
+    transition: all 0.3s ease;
+}
+
+.div-icon {
+    width: 50px;
+    height: 50px;
+}
+
+/* Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc; /* gris de fondo inactivo */
+    transition: 0.4s;
+    border-radius: 34px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 22px;
+    border-radius: 50%;
+    left: 5px;
+    bottom: 6px;
+    background-color: #fff; /* blanco para resaltar */
+    transition: 0.4s;
+}
+
+input:checked + .slider {
+    background-color: #495057; /* verde activo */
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+    background-color: #fff; /* blanco para contraste */
+}

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const OTPVerification = () => {
   const [otpCode, setOtpCode] = useState('');
+  const navigate = useNavigate();
 
   const handleVerify = async (e) => {
     e.preventDefault();
@@ -19,8 +22,10 @@ const OTPVerification = () => {
       const result = await response.json();
       if (result.success) {
         alert(result.message);
-        localStorage.setItem('token', result.token);
-        window.location.href = '/welcome';
+        sessionStorage.setItem('token', result.token);
+        sessionStorage.setItem('userId', result.userId);
+        sessionStorage.setItem('username', result.username)
+        navigate('/home');
       } else {
         alert(result.message || 'Error al verificar OTP');
       }
