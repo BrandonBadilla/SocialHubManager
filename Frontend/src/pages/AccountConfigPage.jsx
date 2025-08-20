@@ -1,7 +1,40 @@
+import React, { useState } from 'react';
 import '../styles/AccountConfigPage.css'
 import BackButton from "../components/BackButton";
+import ModalLoginAccounts from "../components/ModalLoginAccounts";
 
 const AccountConfigPage = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeAccount, setActiveAccount] = useState(null); // LinkedIn o Mastodon
+    const [pendingState, setPendingState] = useState(null);
+    const [checkedAccounts, setCheckedAccounts] = useState({
+        linkedin: false,
+        mastodon: false
+    });
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setActiveAccount(null);
+        setPendingState(null);
+    };
+
+    const handleCheckboxChange = (account) => {
+        // Invertimos el estado actual para saber qué quiere el usuario
+        const nextState = !checkedAccounts[account];
+        setPendingState(nextState);
+        setActiveAccount(account);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirm = () => {
+        // Aplica el cambio (activar o desactivar)
+        setCheckedAccounts(prev => ({
+        ...prev,
+        [activeAccount]: pendingState
+        }));
+        closeModal();
+    };
+
     return(
         <div>
             <div className="container-back-button">
@@ -17,7 +50,11 @@ const AccountConfigPage = () => {
                     <img src="/images/linkedin.png" alt="LinkedIn" className="div-icon" />
                     LinkedIn
                     <label className="switch">
-                        <input type="checkbox"/>
+                        <input
+                        type="checkbox"
+                        checked={!!checkedAccounts.linkedin}
+                        onChange={() => handleCheckboxChange('linkedin')}
+                        />
                         <span className="slider"></span>
                     </label>
                 </div>
@@ -25,11 +62,28 @@ const AccountConfigPage = () => {
                     <img src="/images/mastodon.png" alt="Mastodon" className="div-icon" />
                     Mastodon
                     <label className="switch">
-                        <input type="checkbox"/>
+                        <input
+                        type="checkbox"
+                        checked={!!checkedAccounts.mastodon}
+                        onChange={() => handleCheckboxChange('mastodon')}
+                        />
                         <span className="slider"></span>
                     </label>
                 </div>
             </div>
+
+            {isModalOpen && (
+                <ModalLoginAccounts
+                onConfirm={handleConfirm}
+                onClose={closeModal}
+                title="¡Atención!"
+                message={
+                    pendingState
+                    ? "Estás activando esta cuenta. ¿Deseas continuar?"
+                    : "Estás desactivando esta cuenta. ¿Deseas continuar?"
+                }
+                />
+            )}
         </div>
     )
 }
