@@ -1,13 +1,37 @@
-// src/pages/DashboardPage.jsx
-import React from "react";
+import React from 'react';
+import { useNavigate } from 'react-router-dom';     // Importa useNavigate
+import '../styles/DashboardPage.css';           
 
 const DashboardPage = () => {
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Página en construcción</p>
-    </div>
-  );
+    const navigate = useNavigate();                 // Inicializa useNavigate
+
+    const handleCreatePost = () => {
+        alert("Navegación hacía Crear una Publicación");
+    };
+
+    const handleSchedule = () => {
+        navigate("/schedule");                      // Navega a la página de horarios
+    };
+
+    const handleGoBack = () => {
+        navigate(-1); // Regresa a la página anterior
+    };
+
+    return (
+        <div className="dashboard-container">
+            <nav className="dashboard-nav">
+                <ul>
+                    <li onClick={handleCreatePost}>Crear una Publicación</li>
+                    <li onClick={handleSchedule}>Horarios de Publicación</li>
+                    <li onClick={handleGoBack}>← Volver</li>
+                </ul>
+            </nav>
+
+            <div className="dashboard-content">
+                {/* Aquí tu contenido principal del dashboard */}
+            </div>
+        </div>
+    );
 };
 
 export default DashboardPage;

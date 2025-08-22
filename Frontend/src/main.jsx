@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import AccountConfig from "./pages/AccountConfigPage.jsx"
 import Dashboard from "./pages/DashboardPage.jsx";
@@ -8,6 +8,7 @@ import Home from "./pages/HomePage.jsx";
 import LoginPage from "./pages/Login.jsx";
 import OTPVerification from "./pages/OTPVerification.jsx";
 import RegisterPage from "./pages/Register.jsx";
+import SchedulePage from './pages/SchedulePage.jsx';
 
 import './styles/style.css';
 
@@ -54,6 +55,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/schedule"
+          element={
+            <ProtectedRoute>
+              <SchedulePage />
             </ProtectedRoute>
           }
         />

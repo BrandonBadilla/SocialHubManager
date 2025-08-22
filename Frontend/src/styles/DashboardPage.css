@@ -1,0 +1,40 @@
+/* Menú de navegación */
+.dashboard-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: linear-gradient(90deg, #699cb6, #2d57a0);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+}
+
+/* Lista del menú */
+.dashboard-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 30px;
+}
+
+/* Elementos del menú */
+.dashboard-nav li {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Efecto hover con fondo */
+.dashboard-nav li:hover {
+    background-color: rgba(180, 47, 47, 0.834);
+}

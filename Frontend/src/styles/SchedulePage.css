@@ -1,0 +1,198 @@
+/* Contenedor principal */
+.schedule-container {
+    padding: 30px;
+    text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #eef2f3, #dfe9f3);
+    min-height: 100vh;
+}
+
+/* Título */
+.schedule-container h1 {
+    margin-bottom: 25px;
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* Wrapper para hacer la tabla scrollable si es necesario */
+.schedule-wrapper {
+    overflow-x: auto;
+    display: inline-block;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Tabla */
+.schedule-table {
+    border-collapse: collapse;
+    background: #fff;
+    min-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.schedule-table th,
+.schedule-table td {
+    border: 1px solid #e0e0e0;
+    padding: 12px;
+    text-align: center;
+    width: 120px;  /* ancho fijo */
+    height: 50px;  /* alto fijo */
+    vertical-align: middle;
+    position: relative;
+}
+
+.schedule-table th {
+    background: linear-gradient(90deg, #6A11CB, #2575FC);
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+/* Horas (time items) */
+.time-item {
+    display: inline-block;
+    padding: 6px 12px;
+    background: linear-gradient(90deg, #6A11CB, #2575FC);
+    color: white;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 3px 0;
+    transition: transform 0.2s ease, background 0.3s ease;
+}
+
+.time-item:hover {
+    background: linear-gradient(90deg, #4A00E0, #005bea);
+    transform: scale(1.05);
+}
+
+/* Botón añadir (+) */
+.add-button {
+    padding: 5px 10px;
+    background-color: #ddd;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-button:hover {
+    background-color: #bbb;
+    transform: scale(1.1);
+}
+
+/* Botones confirmar y cancelar dentro de input time */
+button.confirm {
+    background-color: #28a745; /* verde */
+    color: white;
+    border-radius: 5px;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.confirm:hover {
+    background-color: #218838; /* verde oscuro */
+}
+
+button.cancel {
+    background-color: #dc3545; /* rojo */
+    color: white;
+    border-radius: 5px;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button.cancel:hover {
+    background-color: #c82333; /* rojo oscuro */
+}
+
+/* Hint */
+.hint {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Botón volver */
+.back-btn {
+    padding: 10px 20px;
+    background-color: #a41e2b;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 20px;
+}
+
+.back-btn:hover {
+    background-color: #555c56;
+    transform: scale(1.05);
+}
+
+/* Modal overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Modal box */
+.modal-content {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+/* Botones dentro del modal */
+.modal-buttons {
+    margin-top: 15px;
+}
+
+.modal-content button {
+    padding: 5px 12px;
+    margin: 0 5px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.modal-content button.confirm {
+    background-color: #28a745;
+    color: white;
+}
+
+.modal-content button.confirm:hover {
+    background-color: #218838;
+}
+
+.modal-content button.cancel {
+    background-color: #dc3545;
+    color: white;
+}
+
+.modal-content button.cancel:hover {
+    background-color: #c82333;
+}
