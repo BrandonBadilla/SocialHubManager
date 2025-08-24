@@ -15,18 +15,28 @@ const ModalsSchedulePage = ({
 
     return (
         <>
-            {/* Modal para agregar hora */}
+            {/* Modal Agregar/Editar */}
             {addModal.visible && (
-                <div className="modal-overlay" onClick={closeAddModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <h2>Agregar hora</h2>
-                        <input type="time" value={addModal.time} onChange={(e) => setAddModal({...addModal, time: e.target.value})} />
-                        <div className="modal-buttons">
-                            <button className="confirm" onClick={handleConfirmAddTime}>✓</button>
-                            <button className="cancel" onClick={closeAddModal}>✗</button>
-                        </div>
-                    </div>
+            <div className="modal-overlay" onClick={closeAddModal}>
+                <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                <h3>{addModal.mode === "edit" ? "Editar Horario" : "Agregar Hora"}</h3>
+                <input
+                    type="time"
+                    value={addModal.time}
+                    onChange={(e) =>
+                    setAddModal((prev) => ({ ...prev, time: e.target.value }))
+                    }
+                />
+                <div className="modal-buttons">
+                    <button className="confirm" onClick={handleConfirmAddTime}>
+                    {addModal.mode === "edit" ? "Guardar Cambios" : "Agregar"}
+                    </button>
+                    <button className="cancel" onClick={closeAddModal}>
+                    ✗
+                    </button>
                 </div>
+                </div>
+            </div>
             )}
 
             {/* Modal de confirmación para eliminar */}

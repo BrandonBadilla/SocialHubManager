@@ -1,122 +1,267 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/SchedulePage.css';
-import ModalsSchedulePage from '../components/ModalsSchedulePage';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/SchedulePage.css";
+import ModalsSchedulePage from "../components/ModalsSchedulePage";
 
 const SchedulePage = () => {
-    const navigate = useNavigate();
-    const [schedule, setSchedule] = useState({
-        L: Array(6).fill(""),
-        K: Array(6).fill(""),
-        M: Array(6).fill(""),
-        J: Array(6).fill(""),
-        V: Array(6).fill(""),
-        S: Array(6).fill(""),
-        D: Array(6).fill(""),
+  const [schedule, setSchedule] = useState([]);
+  const navigate = useNavigate();
+
+  // Modal para agregar o editar horario
+  const [addModal, setAddModal] = useState({
+    visible: false,
+    day: null,
+    time: "",
+    mode: "add", // "add" o "edit"
+    scheduleId: null,
+  });
+
+  // Modal para eliminar horario
+  const [deleteModal, setDeleteModal] = useState({
+    visible: false,
+    scheduleId: null,
+  });
+
+  // Conversión de hora a minutos para ordenar
+  const timeToMinutes = (time) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  useEffect(() => {
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) {
+      console.error("El userId no está disponible.");
+      navigate("/");
+      return;
+    }
+
+    const fetchSchedules = async () => {
+      try {
+        const response = await fetch(`/api/schedules/${userId}`);
+        if (!response.ok) throw new Error("Error al obtener los horarios");
+        const data = await response.json();
+
+        // Ordenar por día y hora
+        const sortedData = Array.isArray(data)
+          ? data.sort((a, b) => {
+              if (a.day_of_week === b.day_of_week) {
+                return timeToMinutes(a.time) - timeToMinutes(b.time);
+              }
+              return 0;
+            })
+          : [];
+
+        setSchedule(sortedData);
+      } catch (error) {
+        console.error("Error al obtener horarios:", error);
+      }
+    };
+
+    fetchSchedules();
+  }, [navigate]);
+
+  // Abrir modal para agregar
+  const openAddModal = (day) => {
+    setAddModal({
+      visible: true,
+      day,
+      time: "",
+      mode: "add",
+      scheduleId: null,
     });
+  };
 
-    // Estados de modales
-    const [addModal, setAddModal] = useState({ visible: false, day: null, index: null, time: "" });
-    const [deleteModal, setDeleteModal] = useState({ visible: false, day: null, index: null });
+  // Abrir modal para editar
+  const openEditModal = (scheduleItem) => {
+    setAddModal({
+      visible: true,
+      day: scheduleItem.day_of_week,
+      time: scheduleItem.time,
+      mode: "edit",
+      scheduleId: scheduleItem.id,
+    });
+  };
 
-    const convertToAMPM = (time) => {
-        const [hours, minutes] = time.split(":").map(Number);
-        const ampm = hours >= 12 ? "PM" : "AM";
-        const adjustedHours = hours % 12 || 12;
-        return `${adjustedHours}:${minutes.toString().padStart(2, "0")} ${ampm}`;
-    };
+  // Confirmar agregar o editar horario
+  const handleConfirmAddTime = async () => {
+    if (!addModal.time) return;
 
-    const openAddModal = (day, index) => setAddModal({ visible: true, day, index, time: "" });
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) {
+      console.error("El userId no está disponible.");
+      navigate("/");
+      return;
+    }
 
-    const handleConfirmAddTime = () => {
-        if (addModal.time) {
-            const formattedTime = convertToAMPM(addModal.time);
-            setSchedule((prev) => {
-                const updatedDay = [...prev[addModal.day]];
-                updatedDay[addModal.index] = formattedTime;
-
-                // Ordenar de más temprano a más tarde
-                const timesOnly = updatedDay
-                    .filter((t) => t !== "")
-                    .map((t) => {
-                        const [hourMin, ampm] = t.split(" ");
-                        let [h, m] = hourMin.split(":").map(Number);
-                        if (ampm === "PM" && h !== 12) h += 12;
-                        if (ampm === "AM" && h === 12) h = 0;
-                        return { original: t, hours: h, minutes: m };
-                    });
-                timesOnly.sort((a, b) => a.hours - b.hours || a.minutes - b.minutes);
-                const sortedDay = Array(6).fill("");
-                timesOnly.forEach((t, i) => sortedDay[i] = t.original);
-                return { ...prev, [addModal.day]: sortedDay };
-            });
-        }
-        setAddModal({ visible: false, day: null, index: null, time: "" });
-    };
-
-    const handleDeleteClick = (day, index) => setDeleteModal({ visible: true, day, index });
-
-    const confirmDeleteTime = () => {
-        setSchedule((prev) => {
-            const updatedDay = [...prev[deleteModal.day]];
-            updatedDay[deleteModal.index] = "";
-            return { ...prev, [deleteModal.day]: updatedDay };
+    try {
+      let response;
+      if (addModal.mode === "edit") {
+        // EDITAR (PUT)
+        response = await fetch(`/api/schedules/${addModal.scheduleId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            dayOfWeek: addModal.day,
+            time: addModal.time,
+          }),
         });
-        setDeleteModal({ visible: false, day: null, index: null });
-    };
+      } else {
+        // AGREGAR (POST)
+        response = await fetch("/api/schedules", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId,
+            dayOfWeek: addModal.day,
+            time: addModal.time,
+          }),
+        });
+      }
 
-    return (
-        <div className="schedule-container">
-            <h1>Horarios de publicación</h1>
-            <table className="schedule-table">
-                <thead>
-                    <tr>
-                        {["L", "K", "M", "J", "V", "S", "D"].map((day) => (
-                            <th key={day}>{day}</th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {Array.from({ length: 6 }).map((_, rowIndex) => (
-                        <tr key={rowIndex}>
-                            {["L", "K", "M", "J", "V", "S", "D"].map((day) => (
-                                <td key={day}>
-                                    {schedule[day][rowIndex] ? (
-                                        <span
-                                            className="time-item"
-                                            onClick={() => handleDeleteClick(day, rowIndex)}
-                                        >
-                                            {schedule[day][rowIndex]}
-                                        </span>
-                                    ) : (
-                                        <button
-                                            className="add-button"
-                                            onClick={() => openAddModal(day, rowIndex)}
-                                        >
-                                            +
-                                        </button>
-                                    )}
-                                </td>
-                            ))}
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+      if (response.ok) {
+        const updatedSchedule = await response.json();
+        setSchedule((prev) => {
+          let updated;
+          if (addModal.mode === "edit") {
+            updated = prev.map((item) =>
+              item.id === addModal.scheduleId ? updatedSchedule : item
+            );
+          } else {
+            updated = [...prev, updatedSchedule];
+          }
 
-            <p className="hint">Haz clic en una hora para eliminarla o en "+" para agregar nuevas.</p>
-            <button className="back-btn" onClick={() => navigate(-1)}>← Volver</button>
+          return updated.sort((a, b) => {
+            if (a.day_of_week === b.day_of_week) {
+              return timeToMinutes(a.time) - timeToMinutes(b.time);
+            }
+            return 0;
+          });
+        });
 
-            {/* Modales */}
-            <ModalsSchedulePage
-                addModal={addModal}
-                setAddModal={setAddModal}
-                handleConfirmAddTime={handleConfirmAddTime}
-                deleteModal={deleteModal}
-                setDeleteModal={setDeleteModal}
-                confirmDeleteTime={confirmDeleteTime}
-            />
-        </div>
-    );
+        setAddModal({ visible: false, day: null, time: "", mode: "add", scheduleId: null });
+      } else {
+        console.error("Error al guardar horario.");
+      }
+    } catch (error) {
+      console.error("Error al guardar horario:", error);
+    }
+  };
+
+  // Abrir modal para eliminar
+  const openDeleteModal = (scheduleId) => {
+    setDeleteModal({ visible: true, scheduleId });
+  };
+
+  // Confirmar eliminación
+  const confirmDeleteTime = async () => {
+    try {
+      const response = await fetch(`/api/schedules/${deleteModal.scheduleId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setSchedule((prev) =>
+          prev.filter((item) => item.id !== deleteModal.scheduleId)
+        );
+      } else {
+        console.error("Error al eliminar horario.");
+      }
+    } catch (error) {
+      console.error("Error al eliminar horario:", error);
+    }
+    setDeleteModal({ visible: false, scheduleId: null });
+  };
+
+  const daysOfWeek = ["L", "K", "M", "J", "V", "S", "D"];
+  const maxRows = Math.max(
+    ...daysOfWeek.map(
+      (day) => schedule.filter((item) => item.day_of_week === day).length
+    )
+  );
+
+  return (
+    <div className="schedule-container">
+      <h1>Horarios de publicación</h1>
+      <table className="schedule-table">
+        <thead>
+          <tr>
+            <th>Lunes</th>
+            <th>Martes</th>
+            <th>Miércoles</th>
+            <th>Jueves</th>
+            <th>Viernes</th>
+            <th>Sábado</th>
+            <th>Domingo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Array.from({ length: maxRows + 1 }).map((_, rowIndex) => (
+            <tr key={rowIndex}>
+              {daysOfWeek.map((day, colIndex) => {
+                const daySchedules = schedule.filter(
+                  (item) => item.day_of_week === day
+                );
+
+                if (rowIndex < daySchedules.length) {
+                  const scheduleItem = daySchedules[rowIndex];
+                  return (
+                    <td key={colIndex}>
+                      <span
+                        className="time-item"
+                        onClick={() => openEditModal(scheduleItem)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          openDeleteModal(scheduleItem.id);
+                        }}
+                        title="Clic para editar • Clic derecho para eliminar"
+                      >
+                        {scheduleItem.time}
+                      </span>
+                    </td>
+                  );
+                }
+
+                if (rowIndex === daySchedules.length) {
+                  return (
+                    <td key={colIndex}>
+                      <button
+                        className="add-button"
+                        onClick={() => openAddModal(day)}
+                      >
+                        +
+                      </button>
+                    </td>
+                  );
+                }
+
+                return <td key={colIndex}></td>;
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <p className="hint">
+        Haz clic en una hora para editarla o clic derecho para eliminarla.
+      </p>
+
+      <button className="back-btn" onClick={() => navigate(-1)}>
+        ← Volver
+      </button>
+
+      {/* Modales */}
+      <ModalsSchedulePage
+        addModal={addModal}
+        setAddModal={setAddModal}
+        handleConfirmAddTime={handleConfirmAddTime}
+        deleteModal={deleteModal}
+        setDeleteModal={setDeleteModal}
+        confirmDeleteTime={confirmDeleteTime}
+      />
+    </div>
+  );
 };
 
 export default SchedulePage;

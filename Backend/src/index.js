@@ -6,9 +6,11 @@ const { Pool } = require('pg');
 const path = require('path');
 const speakeasy = require('speakeasy');
 const qrcode = require('qrcode');
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Configuración de la base de datos
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -166,6 +168,66 @@ app.post('/api/login/verify-otp', async (req, res) => {
   }
 });
 
+
+// > > > HORARIOS
+
+// Obtener Horarios
+app.get('/api/schedules/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+      const result = await pool.query(
+          'SELECT * FROM schedules WHERE user_id = $1 ORDER BY day_of_week, time',
+          [userId]
+      );
+      res.json(result.rows);
+  } catch (error) {
+      console.error('Error al obtener horarios:', error);
+      res.status(500).json({ error: 'Error al obtener horarios.' });
+  }
+});
+
+// Crear Horarios
+app.post('/api/schedules', async (req, res) => {
+  const { userId, dayOfWeek, time } = req.body;
+  try {
+      const result = await pool.query(
+          'INSERT INTO schedules (user_id, day_of_week, time) VALUES ($1, $2, $3) RETURNING *',
+          [userId, dayOfWeek, time]
+      );
+      res.status(201).json(result.rows[0]);
+  } catch (error) {
+      console.error('Error al agregar horario:', error);
+      res.status(500).json({ error: 'Error al agregar horario.' });
+  }
+});
+
+// Modificar Horarios
+app.put('/api/schedules/:id', async (req, res) => {
+  const { id } = req.params;
+  const { dayOfWeek, time } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE schedules SET day_of_week = $1, time = $2 WHERE id = $3 RETURNING *',
+      [dayOfWeek, time, id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error al actualizar horario:', error);
+    res.status(500).json({ error: 'Error al actualizar horario.' });
+  }
+});
+
+// Eliminar un Horario
+app.delete('/api/schedules/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM schedules WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error al eliminar horario:', error);
+    res.status(500).json({ error: 'Error al eliminar horario.' });
+  }
+});
 
 // > > > CONFIGURACIONES
 const PORT = process.env.PORT || 3005;
