@@ -9,6 +9,8 @@ import LoginPage from "./pages/Login.jsx";
 import OTPVerification from "./pages/OTPVerification.jsx";
 import RegisterPage from "./pages/Register.jsx";
 import SchedulePage from './pages/SchedulePage.jsx';
+import CreatePostPage from "./pages/CreatePostPage.jsx";
+import MastodonAuth from "./components/MastodonAuth";
 
 import './styles/style.css';
 
@@ -63,6 +65,22 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <ProtectedRoute>
               <SchedulePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/create-post"
+          element={
+            <ProtectedRoute>
+                <CreatePostPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mastodon-auth"
+          element={
+            <ProtectedRoute>
+                <MastodonAuth />
             </ProtectedRoute>
           }
         />

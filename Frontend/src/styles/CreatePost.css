@@ -1,0 +1,110 @@
+.post-container {
+    border-radius: 10px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: rgb(255, 255, 255);
+    background-color: #2a2a2a; /* fondo oscuro */
+}
+
+.post-form {
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    color: rgb(255, 255, 255);
+    background-color: #2a2a2a; /* fondo oscuro */
+}
+
+.success-message {
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #4CAF50; /* verde */
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.post-group {
+    margin-bottom: 15px;
+}
+
+.post-input,
+.post-textarea {
+    width: 90%; /* ocupa todo el ancho disponible */
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #d4c6c6;
+    color: #0c0c0c;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.post-input:focus,
+.post-textarea:focus {
+    border: 2px solid #6A11CB;
+    box-shadow: 0 0 4px rgba(106, 17, 203, 0.5);
+}
+
+.post-button {
+    padding: 10px 20px;
+    background-color: #FF5252;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+    display: block;
+    margin: 0 auto;
+}
+
+.post-button:hover {
+    background-color: #D32F2F;
+}
+
+
+.post-select {
+    width: 90%;
+    padding: 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #d4c6c6;
+    color: #0c0c0c;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none; /* Quita la flecha por defecto */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+/* Al enfocar, similar a los inputs */
+.post-select:focus {
+    border: 2px solid #6A11CB;
+    box-shadow: 0 0 4px rgba(106, 17, 203, 0.5);
+}
+
+
+.post-select-wrapper {
+    position: relative;
+    width: 90%;
+}
+
+.post-select-wrapper::after {
+    content: '▾';
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #0c0c0c;
+    font-size: 12px;
+}

@@ -6,7 +6,7 @@ const DashboardPage = () => {
     const navigate = useNavigate();                 // Inicializa useNavigate
 
     const handleCreatePost = () => {
-        alert("Navegación hacía Crear una Publicación");
+        navigate("/create-post");                   // Navega a la página de posts
     };
 
     const handleSchedule = () => {
