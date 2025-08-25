@@ -4,7 +4,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6); /* Fondo oscuro y elegante */
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,7 +13,7 @@
 }
 
 .modal-content {
-    background: #1b1b1b; /* Negro grisáceo moderno */
+    background: #1b1b1b;
     padding: 30px;
     border-radius: 12px;
     width: 350px;
@@ -25,7 +25,7 @@
 
 .modal-content h2 {
     margin-bottom: 15px;
-    color: #28a745; /* Verde principal */
+    color: #28a745;
 }
 
 .modal-content p {
@@ -33,41 +33,41 @@
     margin-bottom: 30px;
 }
 
-/* Botones separados verticalmente con espacio */
+/* Botones del modal */
 .modal-buttons {
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Espacio entre botones */
+    gap: 15px;
 }
 
-/* Estilo general de los botones */
-button {
+/* Solo afecta a los botones dentro del modal */
+.modal-buttons button {
     border: none;
     border-radius: 8px;
-    padding: 50px 35px;
+    padding: 15px 25px;
     font-size: 1rem;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 /* Botón de cancelar */
-.btn-cancel {
-    background: #6c757d; /* Gris para cancelar */
+.modal-buttons .btn-cancel {
+    background: #bf1c29; /* Rojo */
     color: #fff;
 }
 
-.btn-cancel:hover {
-    background: #bf1c29;
+.modal-buttons .btn-cancel:hover {
+    background: #e03b4b;
 }
 
 /* Botón de confirmar */
-.btn-confirm {
-    background: #28a745; /* Verde principal */
+.modal-buttons .btn-confirm {
+    background: #28a745; /* Verde */
     color: #fff;
 }
 
-.btn-confirm:hover {
-    background: #217c34; /* Verde más oscuro al pasar el mouse */
+.modal-buttons .btn-confirm:hover {
+    background: #217c34;
 }
 
 /* Animaciones */

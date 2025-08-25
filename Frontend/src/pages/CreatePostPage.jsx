@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 import '../styles/CreatePostPage.css';
 import InstantPost from '../components/posts/InstantPost.jsx';
 import ScheduledPost from '../components/posts/ScheduledPost.jsx';
@@ -7,6 +8,7 @@ import QueuePost from '../components/posts/PostQueue.jsx';
 const CreatePostPage = () => {
   const [selectedPostType, setSelectedPostType] = useState('');
   const [selectedSocialMedia, setSelectedSocialMedia] = useState('');
+  const navigate = useNavigate();
 
   const resetForm = () => {
     setSelectedPostType('');
@@ -68,6 +70,7 @@ const CreatePostPage = () => {
       <button className="back-btn" onClick={() => navigate(-1)}>
         ← Volver
       </button>
+
     </div>
   );
 };

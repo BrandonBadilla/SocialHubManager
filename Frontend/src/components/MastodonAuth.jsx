@@ -13,7 +13,7 @@ const MastodonAuth = () => {
 
             try {
                 // Llama al backend para intercambiar el código por un token
-                const response = await fetch('http://localhost:3000/mastodon/token', {
+                const response = await fetch('http://localhost:4000/mastodon/token', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -38,7 +38,7 @@ const MastodonAuth = () => {
                 }
 
                 // Llama al backend para guardar el token en la base de datos
-                const saveResponse = await fetch('http://localhost:3000/mastodon/save-token', {
+                const saveResponse = await fetch('http://localhost:4000/mastodon/save-token', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

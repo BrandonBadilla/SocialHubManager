@@ -74,14 +74,15 @@ const AccountConfigPage = () => {
 
             {isModalOpen && (
                 <ModalLoginAccounts
-                onConfirm={handleConfirm}
-                onClose={closeModal}
-                title="¡Atención!"
-                message={
-                    pendingState
-                    ? "Estás activando esta cuenta. ¿Deseas continuar?"
-                    : "Estás desactivando esta cuenta. ¿Deseas continuar?"
-                }
+                    accountType={activeAccount}
+                    onConfirm={handleConfirm}
+                    onClose={closeModal}
+                    title="¡Atención!"
+                    message={
+                        pendingState
+                        ? "Estás activando esta cuenta. ¿Deseas continuar?"
+                        : "Estás desactivando esta cuenta. ¿Deseas continuar?"
+                    }
                 />
             )}
         </div>
