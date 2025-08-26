@@ -12,7 +12,7 @@ const OTPVerification = () => {
 
   const handleVerify = async (e) => {
     e.preventDefault();
-    const userId = localStorage.getItem('userId');
+    const userId = sessionStorage.getItem('userId');
     if (!userId) {
       setModalMessage('Error: Usuario no autenticado');
       setIsSuccess(false);
