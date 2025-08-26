@@ -13,7 +13,7 @@ const InstantPost = ({ selectedSocialMedia, onReset }) => {
     
         if (selectedSocialMedia === 'mastodon') {
             try {
-                console.log('Enviando post a Mastodon:', postData);
+                console.log('Enviando post a Mastodon: ', postData);
                 const token = sessionStorage.getItem('mastodonToken');
     
                 if (!token) {
@@ -34,13 +34,13 @@ const InstantPost = ({ selectedSocialMedia, onReset }) => {
     
                 if (!response.ok) {
                     const error = await response.json();
-                    console.error('Error al publicar en Mastodon:', error);
+                    console.error('Error al  intentar publicar en Mastodon:', error);
                     return;
                 }
     
                 console.log('Post publicado en Mastodon exitosamente:', await response.json());
             } catch (error) {
-                console.error('Error al enviar post a Mastodon:', error);
+                console.error('Error al intentar enviar post a Mastodon:', error);
             }
         } else {
             console.log('Red social no soportada o seleccionada:', selectedSocialMedia);
