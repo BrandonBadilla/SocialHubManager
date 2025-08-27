@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../styles/CreatePost.css';
 
-const ScheduledPost = ({ onReset }) => {
+const ScheduledPost = ({ selectedSocialMedia, onReset }) => {
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [schedules, setSchedules] = useState([]);
@@ -65,10 +65,10 @@ const ScheduledPost = ({ onReset }) => {
             if (delay > 0) {
                 alert(`La publicación será programada para las ${selectedSchedule.time}.`);
                 setTimeout(async () => {
-                    await publishPost();
+                    await publishPosts();
                 }, delay);
             } else {
-                await publishPost();
+                await publishPosts();
             }
 
             // Limpiar el estado interno del formulario
@@ -86,32 +86,54 @@ const ScheduledPost = ({ onReset }) => {
         }
     };
 
-    const publishPost = async () => {
-        const token = sessionStorage.getItem('mastodonToken');
-        if (!token) {
-            alert('No se encontró el token. Inicia sesión en Mastodon.');
-            return;
+    const publishPosts = async () => {
+        try {
+
+            const mastodonToken = sessionStorage.getItem('mastodonToken');
+            const redditToken = sessionStorage.getItem('redditAccessToken');
+
+            console.log('Tokens actuales:');
+            console.log('Mastodon Token:', mastodonToken);
+            console.log('Reddit Token:', redditToken);
+
+            // --- MASTODON ---
+            if (selectedSocialMedia === 'mastodon' || selectedSocialMedia === 'ambas') {
+            const mastodonToken = sessionStorage.getItem('mastodonToken');
+            if (mastodonToken) {
+                const response = await fetch('http://localhost:4000/mastodon/post', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content, token: mastodonToken }),
+                });
+                if (!response.ok) throw new Error('Error al publicar en Mastodon');
+                const data = await response.json();
+                console.log('Publicado en Mastodon:', data);
+            } else {
+                console.warn('No se encontró token de Mastodon.');
+            }
+            }
+
+            // --- REDDIT ---
+            if (selectedSocialMedia === 'reddit' || selectedSocialMedia === 'ambas') {
+                const redditToken = sessionStorage.getItem('redditAccessToken');
+                if (redditToken) {
+                    const subreddit = 'test'; // <- poner tu subreddit
+                    const response = await fetch('http://localhost:4000/reddit/post', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title, content, access_token: redditToken, subreddit }),
+                    });
+                    if (!response.ok) throw new Error('Error al publicar en Reddit');
+                    const data = await response.json();
+                    console.log('Publicado en Reddit:', data);
+                } else {
+                    console.warn('No se encontró token de Reddit.');
+                }
+            }
+        } catch (error) {
+            console.error('Error publicando en redes sociales:', error);
         }
-
-        const response = await fetch('http://localhost:4000/mastodon/post', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                title,
-                content,
-                token,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error('Error al publicar en Mastodon');
-        }
-
-        const data = await response.json();
-        console.log('Publicado en Mastodon:', data);
-    };
+        };
 
     return (
         <div className="post-container">
