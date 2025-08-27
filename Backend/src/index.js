@@ -12,7 +12,7 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Configuración de la base de datos
+// > > > CONFIGURACIÓN DE LA BASE DE DATOS
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
 // Funciones auxiliares
@@ -51,19 +51,19 @@ app.use(express.static(path.join(__dirname)));
 app.post('/api/register', async (req, res) => {
   const { username, email, password } = req.body;
 
-  // Validación de entrada
+  // - Validación de Entrada
   if (!username || !email || !password) {
     return res.status(400).json({ success: false, message: 'Todos los campos son requeridos' });
   }
 
   try {
-    // Verificar si el email ya existe
+    // Verificación de la Existencia del Email
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ success: false, message: 'El correo ya está registrado' });
     }
 
-    // Cifrar contraseña y guardar usuario
+    // Cifrar Contraseña y Guardar Usuario
     const hashedPassword = await bcrypt.hash(password, 10);
     const result = await pool.query(
       'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *',
@@ -72,7 +72,7 @@ app.post('/api/register', async (req, res) => {
 
     const userId = result.rows[0].id;
 
-    // Generar secreto 2FA
+    // Generar Secreto 2FA
     const secret = speakeasy.generateSecret({ name: "Social Hub Manager" });
     await saveUserSecret(userId, secret.base32);
 
@@ -231,6 +231,8 @@ app.delete('/api/schedules/:id', async (req, res) => {
 
 
 // > > > MASTODON AND REDDIT
+
+// Generar los Posts
 app.post('/api/queue-posts', async (req, res) => {
   const { userId, socialNetwork, title, content } = req.body;
 
@@ -304,12 +306,12 @@ app.post('/api/queue-posts', async (req, res) => {
   }
 });
 
-// OBTENER POST / PUBLICACIONES PENDIENTES
+// Obtener Posts
 const processQueuePosts = async () => {
   try {
     const now = new Date();
 
-    // Obtener publicaciones en cola con tiempo programado <= ahora y que no estén en estado "publicado"
+    // Obtener publicaciones pendientes cuya hora ya pasó
     const postsToPublish = await pool.query(
       `SELECT * FROM queue_posts 
        WHERE status = 'en cola' AND scheduled_time <= $1 
@@ -319,58 +321,97 @@ const processQueuePosts = async () => {
 
     for (const post of postsToPublish.rows) {
       try {
-        // Obtener el token del usuario desde la base de datos
-        const userTokenResult = await pool.query(
-          `SELECT token FROM mastodon_tokens WHERE user_id = $1`,
-          [post.user_id]
-        );
+        const publishMastodon = post.social_network === 'mastodon' || post.social_network === 'ambas';
+        const publishReddit  = post.social_network === 'reddit'   || post.social_network === 'ambas';
 
-        if (userTokenResult.rowCount === 0) {
-          console.error(`No se encontró un token para el usuario ${post.user_id}`);
-          continue;
+        // === PUBLICAR EN MASTODON ===
+        if (publishMastodon) {
+          const tokenResult = await pool.query(
+            `SELECT token FROM mastodon_tokens WHERE user_id = $1`,
+            [post.user_id]
+          );
+
+          if (tokenResult.rowCount === 0) {
+            console.error(`No se encontró token de Mastodon para usuario ${post.user_id}`);
+          } else {
+            const mastodonToken = tokenResult.rows[0].token;
+            const response = await fetch(`${process.env.MASTODON_API_URL}/api/v1/statuses`, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${mastodonToken}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ status: `${post.title}\n\n${post.content || ''}` }),
+            });
+
+            if (!response.ok) {
+              const error = await response.json();
+              console.error(`Error publicando en Mastodon (post ${post.id}):`, error);
+            } else {
+              console.log(`Publicado en Mastodon: ${post.title}`);
+            }
+          }
         }
 
-        const userToken = userTokenResult.rows[0].token;
+        // === PUBLICAR EN REDDIT ===
+        if (publishReddit) {
+          const tokenResult = await pool.query(
+            `SELECT access_token FROM reddit_tokens WHERE user_id = $1`,
+            [post.user_id]
+          );
 
-        // Publicar en Mastodon utilizando el token
-        const response = await fetch(`${process.env.MASTODON_API_URL}/api/v1/statuses`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            status: `${post.title}\n\n${post.content}`, // Combina título y contenido en un solo estado
-          }),
-        });
+          if (tokenResult.rowCount === 0) {
+            console.error(`No se encontró token de Reddit para usuario ${post.user_id}`);
+          } else {
+            const redditToken = tokenResult.rows[0].access_token;
+            const subreddit = post.subreddit || process.env.DEFAULT_SUBREDDIT || 'test';
+            const params = new URLSearchParams();
+            params.append('sr', subreddit);
+            params.append('title', post.title);
+            params.append('text', post.content || '');
+            params.append('kind', 'self');
 
-        if (!response.ok) {
-          const error = await response.json();
-          console.error(`Error al publicar en Mastodon para el post ${post.id}:`, error);
-          continue;
+            const redditResponse = await fetch('https://oauth.reddit.com/api/submit', {
+              method: 'POST',
+              headers: {
+                Authorization: `bearer ${redditToken}`,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': process.env.REDDIT_USER_AGENT || 'social-hub-manager/0.1 by yourusername'
+              },
+              body: params
+            });
+
+            const redditData = await redditResponse.json();
+            if (!redditResponse.ok) {
+              console.error(`Error publicando en Reddit (post ${post.id}):`, redditData);
+            } else {
+              console.log(`Publicado en Reddit: ${post.title}`);
+            }
+          }
         }
 
-        console.log(`Post publicado en Mastodon: ${post.title}`);
+        // === Actualizar estado a "publicado" si se intentó publicar en alguna red ===
+        if (publishMastodon || publishReddit) {
+          await pool.query(
+            `UPDATE queue_posts SET status = 'publicado', published_at = NOW() WHERE id = $1`,
+            [post.id]
+          );
+        }
 
-        // Actualizar estado a "publicado"
-        await pool.query(
-          `UPDATE queue_posts SET status = 'publicado', published_at = NOW() 
-           WHERE id = $1`,
-          [post.id]
-        );
       } catch (error) {
-        console.error(`Error al procesar el post ${post.id}:`, error);
+        console.error(`Error procesando post ${post.id}:`, error);
       }
     }
+
   } catch (error) {
     console.error('Error al procesar la cola de publicaciones:', error);
   }
 };
 
-
 // Ejecutar el procesamiento cada minuto
 setInterval(processQueuePosts, 60000);
 
+// Obtener los Posts por ID de Usuario
 app.get('/api/queue-posts/:userId', async (req, res) => {
   const { userId } = req.params;
 
@@ -406,7 +447,9 @@ app.get('/api/queue-posts/:userId', async (req, res) => {
 });
 
 
-// Crear una Publicación en Mastodon
+// > > > MASTODON
+
+// Publicar  directamente en Mastodon
 app.post('/mastodon/post', async (req, res) => {
   const { title, content, token } = req.body;
 
@@ -468,7 +511,7 @@ app.post('/mastodon/token', async (req, res) => {
   }
 });
 
-
+// Guardar Token de Mastodon en BD
 app.post('/mastodon/save-token', async (req, res) => {
   const { userId, token } = req.body;
 
@@ -567,7 +610,7 @@ app.post('/reddit/save-token', async (req, res) => {
   }
 });
 
-// Publicar directamente en Reddit (usa access_token)
+// Publicar directamente en Reddit
 app.post('/reddit/post', async (req, res) => {
   const { title, content, access_token, subreddit } = req.body;
   if (!access_token  || !title  || !subreddit) {
