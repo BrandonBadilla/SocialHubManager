@@ -1,16 +1,11 @@
-// twitterAuth.js
 export const redirectToTwitterAuth = async () => {
   try {
-    // Pedimos al backend la URL de autenticación (incluye PKCE y state)
-    const res = await fetch('http://localhost:4000/auth/twitter/url');
-    const data = await res.json();
+    const response = await fetch("http://localhost:4000/auth/twitter/url");
+    const data = await response.json();
 
-    // Guardamos state en sessionStorage para validación posterior
-    sessionStorage.setItem('twitter_state', data.state);
-
-    // Redirigimos al usuario a la URL de Twitter
+    sessionStorage.setItem("twitter_oauth_state", data.state);
     window.location.href = data.url;
   } catch (err) {
-    console.error('Error redirigiendo a Twitter Auth:', err);
+    console.error("Error al redirigir a Twitter:", err);
   }
 };

@@ -1,47 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect } from "react";
 
 export default function TwitterAuth() {
-  const [user, setUser] = useState(null);
-
-  const login = async () => {
-    // 1️⃣ Pedimos la URL de autenticación
-    const res = await fetch('http://localhost:4000/auth/twitter/url');
-    const data = await res.json();
-    window.location.href = data.url;
-  };
-
   useEffect(() => {
-    // 2️⃣ Revisamos si viene un ?code= en la URL
     const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
+    const code = params.get("code");
+    const state = params.get("state");
+    const savedState = sessionStorage.getItem("twitter_oauth_state");
 
-    if (code) {
-      fetch('http://localhost:4000/auth/twitter/callback', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code })
+    if (code && state === savedState) {
+      fetch("http://localhost:4000/auth/twitter/callback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, state }),
       })
-        .then(res => res.json())
-        .then(async (tokens) => {
-          const userRes = await fetch('http://localhost:4000/twitter/me', {
-            headers: { access_token: tokens.access_token }
-          });
-          const userInfo = await userRes.json();
-          setUser(userInfo);
-        });
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("✅ Tokens recibidos:", data);
+          sessionStorage.setItem("twitter_access_token", data.access_token);
+        })
+        .catch((err) => console.error("Error en callback:", err));
     }
   }, []);
 
-  return (
-    <div>
-      {user ? (
-        <div>
-          <h2>Bienvenido, {user.data.username}</h2>
-          <p>ID: {user.data.id}</p>
-        </div>
-      ) : (
-        <button onClick={login}>Login con Twitter</button>
-      )}
-    </div>
-  );
+  return <h2>Procesando autenticación con Twitter...</h2>;
 }
