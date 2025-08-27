@@ -5,10 +5,10 @@ import ModalLoginAccounts from "../components/ModalLoginAccounts";
 
 const AccountConfigPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeAccount, setActiveAccount] = useState(null); // Twitter o Mastodon
+    const [activeAccount, setActiveAccount] = useState(null); // Reddit o Mastodon
     const [pendingState, setPendingState] = useState(null);
     const [checkedAccounts, setCheckedAccounts] = useState({
-        twitter: false,
+        reddit: false,
         mastodon: false
     });
 
@@ -47,13 +47,13 @@ const AccountConfigPage = () => {
             <h1>Configuración de Cuentas</h1>
             <div className="grid-divs-container">
                 <div className="grid-div">
-                    <img src="/images/twitter.jpg" alt="Twitter" className="div-icon" />
-                    Twitter
+                    <img src="/images/reddit.jpg" alt="Twitter" className="div-icon" />
+                    Reddit
                     <label className="switch">
                         <input
                         type="checkbox"
-                        checked={!!checkedAccounts.twitter}
-                        onChange={() => handleCheckboxChange('twitter')}
+                        checked={!!checkedAccounts.reddit}
+                        onChange={() => handleCheckboxChange('reddit')}
                         />
                         <span className="slider"></span>
                     </label>

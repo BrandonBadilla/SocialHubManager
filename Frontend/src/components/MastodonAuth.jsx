@@ -31,7 +31,7 @@ const MastodonAuth = () => {
                 // Guardar el token en sessionStorage
                 sessionStorage.setItem('mastodonToken', token);
 
-                const userId = localStorage.getItem('userId'); // Obtén el userId desde localStorage
+                const userId = sessionStorage.getItem('userId'); // Obtén el userId desde localStorage
                 if (!userId) {
                     console.error('No se encontró el userId en localStorage.');
                     return;

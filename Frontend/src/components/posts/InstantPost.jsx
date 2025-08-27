@@ -8,14 +8,11 @@ const InstantPost = ({ selectedSocialMedia, onReset }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const postData = { title, content };
 
-    if (selectedSocialMedia === 'mastodon') {
-      try {
-        console.log('Enviando post a Mastodon: ', postData);
+    try {
+      if (selectedSocialMedia === 'mastodon') {
         const token = sessionStorage.getItem('mastodonToken');
-
         if (!token) {
           console.error('Token no encontrado. Inicia sesión en Mastodon primero.');
           return;
@@ -34,59 +31,54 @@ const InstantPost = ({ selectedSocialMedia, onReset }) => {
         }
 
         console.log('Post publicado en Mastodon exitosamente:', await response.json());
-      } catch (error) {
-        console.error('Error al intentar enviar post a Mastodon:', error);
-      }
-    } else if (selectedSocialMedia === 'twitter') {
-      try {
-        console.log('Enviando post a Twitter: ', postData);
-        const token = sessionStorage.getItem('twitterAccessToken');
-
-        if (!token) {
-          console.error('Token no encontrado. Inicia sesión en Twitter primero.');
+      } 
+      else if (selectedSocialMedia === 'reddit') {
+        const accessToken = sessionStorage.getItem('redditAccessToken');
+        if (!accessToken) {
+          console.error('Token de Reddit no encontrado. Autentícate primero.');
           return;
         }
 
-        const response = await fetch('http://localhost:4000/twitter/post', {
+        // Aquí puedes definir a qué subreddit publicar
+        const subreddit = 'test'; // <- reemplaza con tu subreddit objetivo o input del usuario
+
+        const response = await fetch('http://localhost:4000/reddit/post', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            status: `${title}\n\n${content}` // Twitter usa "status" para el texto del tweet
+            ...postData,
+            access_token: accessToken,
+            subreddit,
           }),
         });
 
         if (!response.ok) {
           const error = await response.json();
-          console.error('Error al publicar en Twitter:', error);
+          console.error('Error al publicar en Reddit:', error);
           return;
         }
 
-        console.log('Post publicado en Twitter exitosamente:', await response.json());
-      } catch (error) {
-        console.error('Error al intentar enviar post a Twitter:', error);
+        console.log('Post publicado en Reddit exitosamente:', await response.json());
+      } 
+      else {
+        console.warn('Red social no soportada o no seleccionada:', selectedSocialMedia);
       }
-    } else {
-      console.log('Red social no soportada o seleccionada:', selectedSocialMedia);
-    }
 
-    setTitle('');
-    setContent('');
-    setIsPublished(true);
-    onReset();
-    setTimeout(() => setIsPublished(false), 3000);
+      setTitle('');
+      setContent('');
+      setIsPublished(true);
+      onReset();
+
+      setTimeout(() => setIsPublished(false), 3000);
+    } catch (error) {
+      console.error('Error al enviar post:', error);
+    }
   };
 
   return (
     <div className="post-container">
       <h2 className="post-header">Post Instantáneo</h2>
-      {isPublished && (
-        <div className="success-message">
-          ¡El post ha sido publicado con éxito!
-        </div>
-      )}
+      {isPublished && <div className="success-message">¡El post ha sido publicado con éxito!</div>}
       <form onSubmit={handleSubmit} className="post-form">
         <div className="post-group">
           <label htmlFor="title" className="post-label">Título:</label>

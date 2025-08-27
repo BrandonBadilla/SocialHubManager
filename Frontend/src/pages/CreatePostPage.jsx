@@ -35,7 +35,7 @@ const CreatePostPage = () => {
       {/* Selección de Red Social */}
       <div className="social-media-options">
         <h3>Seleccione la Red Social:</h3>
-        {['Twitter', 'Mastodon', 'Ambas'].map((media) => (
+        {['Reddit', 'Mastodon', 'Ambas'].map((media) => (
           <button
             key={media}
             className={`social-button ${selectedSocialMedia === media.toLowerCase() ? 'active' : ''}`}

@@ -11,7 +11,7 @@ import RegisterPage from "./pages/Register.jsx";
 import SchedulePage from './pages/SchedulePage.jsx';
 import CreatePostPage from "./pages/CreatePostPage.jsx";
 import MastodonAuth from "./components/MastodonAuth";
-
+import RedditAuth from "./components/RedditAuth";
 import './styles/style.css';
 
 // Componente para proteger rutas
@@ -81,6 +81,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <ProtectedRoute>
                 <MastodonAuth />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reddit-auth"
+          element={
+            <ProtectedRoute>
+                <RedditAuth />
             </ProtectedRoute>
           }
         />
