@@ -11,65 +11,53 @@ const InstantPost = ({ selectedSocialMedia, onReset }) => {
     const postData = { title, content };
 
     try {
-      if (selectedSocialMedia === 'mastodon') {
+      // Publicar en Mastodon si se selecciona Mastodon o Ambas
+      if (selectedSocialMedia === 'mastodon' || selectedSocialMedia === 'ambas') {
         const token = sessionStorage.getItem('mastodonToken');
         if (!token) {
-          console.error('Token no encontrado. Inicia sesión en Mastodon primero.');
-          return;
+          console.error('Token de Mastodon no encontrado. Inicia sesión primero.');
+        } else {
+          const response = await fetch('http://localhost:4000/mastodon/post', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...postData, token }),
+          });
+          if (!response.ok) {
+            const error = await response.json();
+            console.error('Error al publicar en Mastodon:', error);
+          } else {
+            console.log('Post publicado en Mastodon exitosamente:', await response.json());
+          }
         }
+      }
 
-        const response = await fetch('http://localhost:4000/mastodon/post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...postData, token }),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          console.error('Error al publicar en Mastodon:', error);
-          return;
-        }
-
-        console.log('Post publicado en Mastodon exitosamente:', await response.json());
-      } 
-      else if (selectedSocialMedia === 'reddit') {
+      // Publicar en Reddit si se selecciona Reddit o Ambas
+      if (selectedSocialMedia === 'reddit' || selectedSocialMedia === 'ambas') {
         const accessToken = sessionStorage.getItem('redditAccessToken');
         if (!accessToken) {
           console.error('Token de Reddit no encontrado. Autentícate primero.');
-          return;
+        } else {
+          const subreddit = 'test'; // <- reemplaza por tu subreddit
+          const response = await fetch('http://localhost:4000/reddit/post', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...postData, access_token: accessToken, subreddit }),
+          });
+          if (!response.ok) {
+            const error = await response.json();
+            console.error('Error al publicar en Reddit:', error);
+          } else {
+            console.log('Post publicado en Reddit exitosamente:', await response.json());
+          }
         }
-
-        // Aquí puedes definir a qué subreddit publicar
-        const subreddit = 'test'; // <- reemplaza con tu subreddit objetivo o input del usuario
-
-        const response = await fetch('http://localhost:4000/reddit/post', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...postData,
-            access_token: accessToken,
-            subreddit,
-          }),
-        });
-
-        if (!response.ok) {
-          const error = await response.json();
-          console.error('Error al publicar en Reddit:', error);
-          return;
-        }
-
-        console.log('Post publicado en Reddit exitosamente:', await response.json());
-      } 
-      else {
-        console.warn('Red social no soportada o no seleccionada:', selectedSocialMedia);
       }
 
       setTitle('');
       setContent('');
       setIsPublished(true);
       onReset();
-
       setTimeout(() => setIsPublished(false), 3000);
+
     } catch (error) {
       console.error('Error al enviar post:', error);
     }
