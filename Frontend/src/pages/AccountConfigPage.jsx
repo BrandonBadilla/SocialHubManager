@@ -5,7 +5,7 @@ import ModalLoginAccounts from "../components/ModalLoginAccounts";
 
 const AccountConfigPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeAccount, setActiveAccount] = useState(null); // LinkedIn o Mastodon
+    const [activeAccount, setActiveAccount] = useState(null); // Twitter o Mastodon
     const [pendingState, setPendingState] = useState(null);
     const [checkedAccounts, setCheckedAccounts] = useState({
         twitter: false,

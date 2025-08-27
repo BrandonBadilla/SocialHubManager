@@ -230,7 +230,7 @@ app.delete('/api/schedules/:id', async (req, res) => {
 });
 
 
-// > > > MASTODON
+// > > > MASTODON AND REDDIT
 app.post('/api/queue-posts', async (req, res) => {
   const { userId, socialNetwork, title, content } = req.body;
 
@@ -304,6 +304,7 @@ app.post('/api/queue-posts', async (req, res) => {
   }
 });
 
+// OBTENER POST / PUBLICACIONES PENDIENTES
 const processQueuePosts = async () => {
   try {
     const now = new Date();
@@ -504,47 +505,108 @@ app.post('/mastodon/save-token', async (req, res) => {
   }
 });
 
+// > > > REDDIT
+app.post('/reddit/token', async (req, res) => {
+  const { code, redirect_uri } = req.body;
+  if (!code || !redirect_uri) return res.status(400).json({ error: 'Código y redirect_uri requeridos' });
+
+  try {
+    const params = new URLSearchParams();
+    params.append('grant_type', 'authorization_code');
+    params.append('code', code);
+    params.append('redirect_uri', redirect_uri);
+
+    const response = await fetch('https://www.reddit.com/api/v1/access_token', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Basic ' + Buffer.from(`${process.env.REDDIT_CLIENT_ID}:${process.env.REDDIT_CLIENT_SECRET}`).toString('base64'),
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: params
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Error token Reddit:', data);
+      return res.status(500).json({ error: 'Error al obtener token de Reddit', details: data });
+    }
+
+    // data.access_token, data.refresh_token, data.expires_in, data.scope
+    res.status(200).json(data);
+  } catch (error) {
+    console.error('Error al obtener token Reddit:', error);
+    res.status(500).json({ error: 'Error al obtener token de Reddit' });
+  }
+});
+
+// Guardar token de Reddit en DB
+app.post('/reddit/save-token', async (req, res) => {
+  const { userId, access_token, refresh_token, scope } = req.body;
+  if (!userId || !access_token) return res.status(400).json({ error: 'userId y access_token son requeridos' });
+
+  try {
+    const existing = await pool.query('SELECT * FROM reddit_tokens WHERE user_id = $1', [userId]);
+
+    if (existing.rowCount > 0) {
+      await pool.query(
+        `UPDATE reddit_tokens SET access_token = $1, refresh_token = $2, scope = $3, updated_at = NOW() WHERE user_id = $4`,
+        [access_token, refresh_token || null, scope || null, userId]
+      );
+      return res.status(200).json({ message: 'Token Reddit actualizado' });
+    }
+
+    await pool.query(
+      `INSERT INTO reddit_tokens (user_id, access_token, refresh_token, scope) VALUES ($1, $2, $3, $4)`,
+      [userId, access_token, refresh_token || null, scope || null]
+    );
+
+    res.status(201).json({ message: 'Token Reddit guardado' });
+  } catch (error) {
+    console.error('Error al guardar token Reddit:', error);
+    res.status(500).json({ error: 'Error al guardar token Reddit' });
+  }
+});
+
+// Publicar directamente en Reddit (usa access_token)
+app.post('/reddit/post', async (req, res) => {
+  const { title, content, access_token, subreddit } = req.body;
+  if (!access_token  || !title  || !subreddit) {
+    return res.status(400).json({ error: 'access_token, title y subreddit son requeridos' });
+  }
+
+  try {
+    const params = new URLSearchParams();
+    params.append('sr', subreddit);
+    params.append('title', title);
+    params.append('text', content);
+    params.append('kind', 'self');
+
+    const response = await fetch('https://oauth.reddit.com/api/submit', {
+      method: 'POST',
+      headers: {
+        Authorization: `bearer ${access_token}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': process.env.REDDIT_USER_AGENT || 'social-hub-manager/0.1 by yourusername'
+      },
+      body: params
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('Error publicando en Reddit:', data);
+      return res.status(500).json({ error: 'Error publicando en Reddit', details: data });
+    }
+
+    res.status(200).json({ message: 'Publicado en Reddit con éxito', data });
+  } catch (error) {
+    console.error('Error al publicar en Reddit:', error);
+    res.status(500).json({ error: 'Error al publicar en Reddit' });
+  }
+});
+
 
 // > > > CONFIGURACIONES
 const PORT = process.env.PORT || 3005;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-});
-
-
-// POST /twitter/post
-app.post('/twitter/post', async (req, res) => {
-  const { status } = req.body;
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader) return res.status(400).json({ error: 'Falta token de autorización' });
-
-  const access_token = authHeader.replace('Bearer ', '');
-
-  if (!status || status.trim() === '') {
-    return res.status(400).json({ error: 'El contenido del post no puede estar vacío' });
-  }
-
-  try {
-    const response = await fetch('https://api.twitter.com/2/tweets', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${access_token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ text: status })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Error publicando en Twitter:', errorData);
-      return res.status(response.status).json(errorData);
-    }
-
-    const data = await response.json();
-    res.json({ success: true, tweet: data });
-  } catch (err) {
-    console.error('Error enviando post a Twitter:', err);
-    res.status(500).json({ error: 'Error publicando en Twitter' });
-  }
 });
