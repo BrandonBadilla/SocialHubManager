@@ -510,3 +510,41 @@ const PORT = process.env.PORT || 3005;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
 });
+
+
+// POST /twitter/post
+app.post('/twitter/post', async (req, res) => {
+  const { status } = req.body;
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) return res.status(400).json({ error: 'Falta token de autorización' });
+
+  const access_token = authHeader.replace('Bearer ', '');
+
+  if (!status || status.trim() === '') {
+    return res.status(400).json({ error: 'El contenido del post no puede estar vacío' });
+  }
+
+  try {
+    const response = await fetch('https://api.twitter.com/2/tweets', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${access_token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text: status })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('Error publicando en Twitter:', errorData);
+      return res.status(response.status).json(errorData);
+    }
+
+    const data = await response.json();
+    res.json({ success: true, tweet: data });
+  } catch (err) {
+    console.error('Error enviando post a Twitter:', err);
+    res.status(500).json({ error: 'Error publicando en Twitter' });
+  }
+});

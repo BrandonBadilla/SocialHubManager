@@ -6,9 +6,9 @@ const ModalLoginAccounts = ({ accountType, onClose, onConfirm, message }) => {
   const handleLogin = () => {
     if (accountType === "mastodon") {
       redirectToMastodonAuth();
-    } else if (accountType === "linkedin") {
+    } else if (accountType === "twitter") {
       // Aquí podrías agregar la redirección de LinkedIn
-      console.log("Redirigiendo a LinkedIn...");
+      console.log("Redirigiendo a Twitter...");
     }
     onConfirm();
   };

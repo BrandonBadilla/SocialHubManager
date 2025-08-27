@@ -8,7 +8,7 @@ const AccountConfigPage = () => {
     const [activeAccount, setActiveAccount] = useState(null); // LinkedIn o Mastodon
     const [pendingState, setPendingState] = useState(null);
     const [checkedAccounts, setCheckedAccounts] = useState({
-        linkedin: false,
+        twitter: false,
         mastodon: false
     });
 
@@ -47,13 +47,13 @@ const AccountConfigPage = () => {
             <h1>Configuración de Cuentas</h1>
             <div className="grid-divs-container">
                 <div className="grid-div">
-                    <img src="/images/linkedin.png" alt="LinkedIn" className="div-icon" />
-                    LinkedIn
+                    <img src="/images/twitter.jpg" alt="Twitter" className="div-icon" />
+                    Twitter
                     <label className="switch">
                         <input
                         type="checkbox"
-                        checked={!!checkedAccounts.linkedin}
-                        onChange={() => handleCheckboxChange('linkedin')}
+                        checked={!!checkedAccounts.twitter}
+                        onChange={() => handleCheckboxChange('twitter')}
                         />
                         <span className="slider"></span>
                     </label>
