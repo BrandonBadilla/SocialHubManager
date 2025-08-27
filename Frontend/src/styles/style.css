@@ -3,7 +3,7 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #28a745, #81c784); /* Verde degradado */
+  background: linear-gradient(135deg, #32beac, #81c784); /* Verde degradado */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -73,14 +73,14 @@ button:hover {
 
 /* Enlaces */
 a {
-  color: #28a745;
+  color: #d30707;
   text-decoration: none;
   font-weight: bold;
   transition: color 0.3s ease;
 }
 
 a:hover {
-  color: #218838;
+  color: #4b49af;
   text-decoration: underline;
 }
 
